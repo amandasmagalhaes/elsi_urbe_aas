@@ -759,3 +759,4 @@ vif_model_m2 <- glm(
 
 car::vif(vif_model_m2)
 ```
+
