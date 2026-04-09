@@ -3280,8 +3280,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb10-56"><a href="#cb10-56" aria-hidden="true" tabindex="-1"></a>      <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"No"</span>, <span class="st">"Yes"</span>)))</span>
 <span id="cb10-57"><a href="#cb10-57" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-58"><a href="#cb10-58" aria-hidden="true" tabindex="-1"></a>n_total <span class="ot">&lt;-</span> <span class="fu">nrow</span>(analysis_df)</span>
-<span id="cb10-59"><a href="#cb10-59" aria-hidden="true" tabindex="-1"></a>n_good <span class="ot">&lt;-</span> <span class="fu">sum</span>(analysis_df<span class="sc">$</span>aas_inv2 <span class="sc">==</span> <span class="st">"0"</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb10-60"><a href="#cb10-60" aria-hidden="true" tabindex="-1"></a>n_poor <span class="ot">&lt;-</span> <span class="fu">sum</span>(analysis_df<span class="sc">$</span>aas_inv2 <span class="sc">==</span> <span class="st">"1"</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb10-59"><a href="#cb10-59" aria-hidden="true" tabindex="-1"></a>n_good <span class="ot">&lt;-</span> <span class="fu">sum</span>(analysis_df<span class="sc">$</span>aas_inv2 <span class="sc">==</span> <span class="st">"Excelente/Muito boa/Boa"</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb10-60"><a href="#cb10-60" aria-hidden="true" tabindex="-1"></a>n_poor <span class="ot">&lt;-</span> <span class="fu">sum</span>(analysis_df<span class="sc">$</span>aas_inv2 <span class="sc">==</span> <span class="st">"Regular/Ruim/Muito ruim"</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb10-61"><a href="#cb10-61" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-62"><a href="#cb10-62" aria-hidden="true" tabindex="-1"></a>analysis_df <span class="sc">%&gt;%</span></span>
 <span id="cb10-63"><a href="#cb10-63" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_survey_design</span>(</span>
@@ -3855,10 +3855,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <strong>Total<br>n=2766</strong>
 </div></th>
 <th colspan="2" id="level 1; stat_1" class="gt_center gt_columns_top_border gt_column_spanner_outer" data-quarto-table-cell-role="th" scope="colgroup"><div class="gt_column_spanner">
-<strong>Good self-rated health<br>n=0</strong>
+<strong>Good self-rated health<br>n=1391</strong>
 </div></th>
 <th colspan="2" id="level 1; stat_2" class="gt_center gt_columns_top_border gt_column_spanner_outer" data-quarto-table-cell-role="th" scope="colgroup"><div class="gt_column_spanner">
-<strong>Poor self-rated health<br>n=0</strong>
+<strong>Poor self-rated health<br>n=1375</strong>
 </div></th>
 <th rowspan="2" id="p.value" class="gt_col_heading gt_columns_bottom_border gt_center" data-quarto-table-cell-role="th" scope="col"><strong>p-value</strong></th>
 </tr>
