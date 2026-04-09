@@ -66,7 +66,7 @@ The analytical sample followed a two-level multilevel structure in which individ
 
 ## Outcome
 
-The outcome variable was self-rated health, measured with the question: “In general, how do you rate your health?” Response options were categorized as 1 = poor (regular/poor/very poor) and 0 = good (excellent/very good/good).
+The outcome variable was self-rated health, measured with the question: “In general, how do you rate your health?” Response options were categorized as 1 = poor (regular/poor/very poor) and 0 = good (excellent/very good/good). The final analytical sample considering the outcome was 2,766 individuals.
 
 ## Exposures
 
@@ -738,10 +738,11 @@ analysis_data_ct_m2 <- df %>%
 adjustments_m2 <- c(
   "sexo", "faixaetaria", "cor_raca2", "escolaridade2", "estado_civil", "nmoradores2", "rendadompc2corr",
   "dcnt2", "sint_dep", "regularFH", "af_global", "consumo_abusivo", "consumo_tabaco"
-  )
+)
 
 run_model_row_ct_m2 <- function(outcome_var, exp_var) {
 
+  # Build model formula
   model_formula <- as.formula(
     paste(
       outcome_var, "~",
@@ -750,6 +751,7 @@ run_model_row_ct_m2 <- function(outcome_var, exp_var) {
     )
   )
 
+  # Fit Poisson regression model
   model_fit_ct_m2 <- glm(
     formula = model_formula,
     data = analysis_data_ct_m2,
@@ -757,15 +759,18 @@ run_model_row_ct_m2 <- function(outcome_var, exp_var) {
     weights = normalized_weight
   )
 
+  # Compute cluster-robust variance
   robust_vcov <- sandwich::vcovCL(
     model_fit_ct_m2,
     cluster = analysis_data_ct_m2$census_tract
   )
 
+  # Create label list for exposure
   lbl_list <- list()
   lbl_list[[exp_var]] <- exposure_labels[[exp_var]]
 
-  tbl_regression(
+  # Generate regression table
+  table_out <- tbl_regression(
     model_fit_ct_m2,
     include = all_of(exp_var),
     exponentiate = TRUE,
@@ -786,18 +791,37 @@ run_model_row_ct_m2 <- function(outcome_var, exp_var) {
       estimate = "**PR**",
       ci = "**95% CI**"
     )
+
+  # Return both model and table
+  return(list(
+    model = model_fit_ct_m2,
+    table = table_out
+  ))
 }
 
-table_list_ct_m2 <- map(outcome_vars, function(out_v) {
-  sub_tables <- map(exposure_vars, ~run_model_row_ct_m2(out_v, .x))
+# Run models and store results
+results_list_ct_m2 <- map(outcome_vars, function(out_v) {
+  map(exposure_vars, ~run_model_row_ct_m2(out_v, .x))
+})
+
+# Extract tables only
+table_list_ct_m2 <- map(results_list_ct_m2, function(res_outcome) {
+  sub_tables <- map(res_outcome, "table")
   tbl_stack(sub_tables)
 })
 
+# Stack final table
 final_table_ct_m2 <- tbl_stack(
   tbls = table_list_ct_m2,
   group_header = outcome_labels[outcome_vars]
 )
 
+# Extract models only (for diagnostics)
+models_ct_m2 <- results_list_ct_m2 %>%
+  purrr::flatten() %>%
+  purrr::map("model")
+
+# Create gt table
 gt_table <- final_table_ct_m2 %>%
   as_gt()
 
@@ -1122,5 +1146,41 @@ gt_table_m5_dep %>%
 ```
 
 
-## Post-model fit diagnostics for Poisson regression
+## Post-model fit diagnostics
+* Dispersion: ~1 (adequate), >2 (overdispersion), <1 (underdispersion)
+* Pearson residuals: < −3 or > 3 (possible outliers)
+* Cook’s distance: >1 (influential observations)
+* Leverage: higher values indicate greater influence on fitted values
 
+```{r}
+#| label: Post-model fit diagnostics
+#| code-summary: Post-model fit diagnostics
+
+check_model_fit <- function(model) {
+
+  # Pearson dispersion
+  dispersion <- sum(residuals(model, type = "pearson")^2) / df.residual(model)
+
+  # Residuals
+  res <- residuals(model, type = "pearson")
+
+  # Influence
+  cooks <- cooks.distance(model)
+
+  # Leverage
+  hat <- hatvalues(model)
+
+  data.frame(
+    n = nobs(model),
+    dispersion = dispersion,
+    min_residual = min(res),
+    max_residual = max(res),
+    max_cooks = max(cooks, na.rm = TRUE),
+    max_leverage = max(hat, na.rm = TRUE)
+  )
+}
+
+diagnostics_ct_m2 <- purrr::map_df(models_ct_m2, check_model_fit)
+
+diagnostics_ct_m2
+```
