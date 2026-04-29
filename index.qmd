@@ -656,7 +656,7 @@ run_model_row_ct_minimo <- function(outcome_var, exp_var) {
   lbl_list <- list()
   lbl_list[[exp_var]] <- exposure_labels[[exp_var]]
 
-  tbl_regression(
+  table_out <- tbl_regression(
     model_fit_ct_minimo,
     include = all_of(exp_var),
     exponentiate = TRUE,
@@ -675,12 +675,23 @@ run_model_row_ct_minimo <- function(outcome_var, exp_var) {
     modify_header(
       label = "**Neighborhood indicators**",
       estimate = "**PR**",
-      ci = "**95% CI**"
-    )
+      ci = "**95% CI**")
+    return(list(
+    model = model_fit_ct_minimo,
+    table = table_out
+))
 }
 
-table_list_ct_minimo <- map(outcome_vars, function(out_v) {
-  sub_tables <- map(exposure_vars, ~run_model_row_ct_minimo(out_v, .x))
+results_list_ct_minimo <- map(outcome_vars, function(out_v) {
+  map(exposure_vars, ~run_model_row_ct_minimo(out_v, .x))
+})
+
+models_ct_minimo <- results_list_ct_minimo %>%
+  purrr::flatten() %>%
+  purrr::map("model")
+
+table_list_ct_minimo <- map(results_list_ct_minimo, function(res_outcome) {
+  sub_tables <- map(res_outcome, "table")
   tbl_stack(sub_tables)
 })
 
@@ -963,6 +974,10 @@ run_model_row_ct_m3 <- function(outcome_var, exp_var) {
 results_list_ct_m3 <- map(outcome_vars, function(out_v) {
   map(exposure_vars, ~run_model_row_ct_m3(out_v, .x))})
 
+models_ct_m3 <- results_list_ct_m3 %>%
+  purrr::flatten() %>%
+  purrr::map("model")
+
 table_list_ct_m3 <- map(results_list_ct_m3, function(res_outcome) {
   sub_tables <- map(res_outcome, "table")
   tbl_stack(sub_tables)})
@@ -988,6 +1003,29 @@ gt_table_m3 %>%
   ) %>%
   gt::tab_source_note(
     source_note = "Abbreviations: PR = Prevalence Ratio; CI = Confidence Interval. Each association was estimated in a separate Poisson regression model with robust variance clustered at the census tract level, adjusted for sex, age group, race/color, education, marital status, number of household residents, household income per capita, number of chronic diseases, fruit and vegetable consumption, binge drinking, and current tobacco use.")
+```
+
+```{r}
+#| label: AIC and BIC comparison
+#| code-summary: AIC and BIC comparison
+#| warning: false
+#| message: false
+
+comparison_fit <- purrr::map2_df(
+  models_ct_minimo,
+  models_ct_m3,
+  ~data.frame(
+    AIC_minimo = AIC(.x),
+    AIC_m3     = AIC(.y),
+    delta_AIC  = AIC(.x) - AIC(.y),
+    BIC_minimo = BIC(.x),
+    BIC_m3     = BIC(.y),
+    delta_BIC  = BIC(.x) - BIC(.y)
+  )
+)
+
+comparison_fit$exposure <- exposure_labels
+comparison_fit
 ```
 
 ```{r}
