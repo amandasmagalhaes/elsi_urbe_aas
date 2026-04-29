@@ -617,8 +617,8 @@ gt_table_crude %>%
 ```
 
 ```{r}
-#| label: Model – Minimum adjustment set
-#| code-summary: Model – Minimum adjustment set
+#| label: Minimum adjustment set
+#| code-summary: Minimum adjustment set
 #| warning: false
 #| message: false
 
