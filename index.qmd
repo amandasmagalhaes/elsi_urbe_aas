@@ -1144,8 +1144,7 @@ analysis_data_ct_m5 <- df %>%
     normalized_weight = peso_calibrado / mean(peso_calibrado, na.rm = TRUE))
 
 adjustments_m5 <- c(
-  "sexo", "faixaetaria", "cor_raca2", "escolaridade2", "estado_civil", "nmoradores2", "rendadompc2corr",
-  "dcnt2", "regularFH", "sint_dep", "consumo_abusivo", "consumo_tabaco")
+  "sexo", "faixaetaria", "cor_raca2", "escolaridade2", "estado_civil", "nmoradores2", "rendadompc2corr", "dcnt2", "regularFH", "sint_dep", "consumo_abusivo", "consumo_tabaco")
 
 run_model_row_ct_m5 <- function(outcome_var, exp_var) {
 
@@ -1178,7 +1177,7 @@ run_model_row_ct_m5 <- function(outcome_var, exp_var) {
     vcov = robust_vcov,
     tidy_fun = broom.helpers::tidy_parameters,
     estimate_fun = function(x) style_number(x, digits = 2),
-    pvalue_fun = function(x) style_pvalue(x, digits = 3),
+    pvalue_fun = function(x) formatC(x, format = "f", digits = 3),
     show_single_row = all_of(exp_var)
   ) %>%
     modify_table_body(
