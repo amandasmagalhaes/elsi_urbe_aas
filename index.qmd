@@ -34,7 +34,7 @@ p_load(
   # Survey data analysis
   survey, srvyr,
   # Statistical modeling
-  glmmTMB, car, sandwich, lmtest,
+  glmmTMB, car, sandwich, lmtest, lme4,
   # Model outputs and tidying
   broom.mixed, broom.helpers,
   # Tables and reporting
@@ -716,7 +716,108 @@ gt_table_minimo %>%
     table.width = gt::pct(100)
   ) %>%
   gt::tab_source_note(
-    source_note = "Abbreviations: PR = Prevalence Ratio; CI = Confidence Interval. Each association was estimated in a separate Poisson regression model with robust variance clustered at the census tract level, adjusted for sex, age group, race/color, education, and household income per capita."
+    source_note = "Abbreviations: PR = Prevalence Ratio; CI = Confidence Interval. Each association was estimated in a separate Poisson regression model with robust variance clustered at the census tract level, adjusted for sex, age group, race/color, education, and household income per capita. Sampling weights were incorporated as normalized weights."
+  )
+```
+
+```{r}
+#| label: Minimum adjustment set - random intercepts for census tract
+#| code-summary: Minimum adjustment set - random intercepts for census tract
+#| warning: false
+#| message: false
+
+analysis_data_ct_minimo <- df %>%
+  filter(zona == 1, !is.na(identificador), !is.na(aas_inv2)) %>%
+  mutate(
+    census_tract = factor(setor),
+    normalized_weight = peso_calibrado / mean(peso_calibrado, na.rm = TRUE)
+  )
+
+adjustments_minimo <- c(
+  "sexo", "faixaetaria", "cor_raca2", "escolaridade2", "rendadompc2corr")
+
+run_model_row_ct_minimo_ml <- function(outcome_var, exp_var) {
+
+  model_formula <- as.formula(
+    paste(
+      outcome_var, "~", exp_var, "+",
+      paste(adjustments_minimo, collapse = " + "),
+      "+ (1 | census_tract)"
+    )
+  )
+
+  model_fit_ct_ml <- glmer(
+    formula = model_formula,
+    data = analysis_data_ct_minimo,
+    family = poisson(link = "log"),
+    weights = normalized_weight,
+    control = glmerControl(optimizer = "bobyqa")
+  )
+
+  lbl_list <- list()
+  lbl_list[[exp_var]] <- exposure_labels[[exp_var]]
+
+  table_out <- tbl_regression(
+    model_fit_ct_ml,
+    include = all_of(exp_var),
+    exponentiate = TRUE,
+    label = lbl_list,
+    tidy_fun = broom.mixed::tidy,
+    estimate_fun = function(x) style_number(x, digits = 2),
+    pvalue_fun = function(x) style_pvalue(x, digits = 3),
+    show_single_row = all_of(exp_var)
+  ) %>%
+    modify_table_body(
+      ~ .x %>%
+        mutate(ci = gsub(",", " -", ci)) %>%
+        select(-any_of(c("group", "conf.low", "conf.high")))
+    ) %>%
+    modify_header(
+      label = "**Neighborhood indicators**",
+      estimate = "**PR**",
+      ci = "**95% CI**"
+    )
+  return(list(
+    model = model_fit_ct_ml,
+    table = table_out
+  ))
+}
+
+results_list_ct_minimo_ml <- map(outcome_vars, function(out_v) {
+  map(exposure_vars, ~run_model_row_ct_minimo_ml(out_v, .x))
+})
+
+models_ct_minimo_ml <- results_list_ct_minimo_ml %>%
+  flatten() %>%
+  map("model")
+
+table_list_ct_minimo_ml <- map(results_list_ct_minimo_ml, function(res_outcome) {
+  sub_tables <- map(res_outcome, "table")
+  tbl_stack(sub_tables)
+})
+
+final_table_ct_minimo_ml <- tbl_stack(
+  tbls = table_list_ct_minimo_ml,
+  group_header = outcome_labels[outcome_vars]
+)
+
+gt_table_minimo_ml <- final_table_ct_minimo_ml %>%
+  as_gt()
+
+gt_table_minimo_ml$`_source_notes` <- list()
+
+gt_table_minimo_ml %>%
+  gt::cols_hide(
+    columns = matches("^group")
+  ) %>%
+  gt::cols_width(
+    label ~ gt::px(500)
+  ) %>%
+  gt::tab_options(
+    table.width = gt::pct(100)
+  ) %>%
+  gt::tab_source_note(
+    source_note = "Abbreviations: PR = Prevalence Ratio; CI = Confidence Interval. Associations were estimated using mixed-effects Poisson regression models with random intercepts for census tract, adjusted for sex, age group, race/color, education, and household income per capita. Sampling weights were incorporated as normalized weights."
   )
 ```
 
