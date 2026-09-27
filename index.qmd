@@ -28,19 +28,31 @@ rm(list = ls())
 library(pacman)
 p_load(
   # Data manipulation and wrangling
-  tidyverse, dplyr, purrr, here,
+  tidyverse,
+  dplyr,
+  purrr,
+  here,
   # Data import
   haven,
   # Survey data analysis
-  survey, srvyr,
+  survey,
+  srvyr,
   # Statistical modeling
-  glmmTMB, car, sandwich, lmtest, lme4,
+  glmmTMB,
+  car,
+  sandwich,
+  lmtest,
+  lme4,
   # Model outputs and tidying
-  broom.mixed, broom.helpers,
+  broom.mixed,
+  broom.helpers,
   # Tables and reporting
-  gt, gtsummary, kableExtra,
+  gt,
+  gtsummary,
+  kableExtra,
   # Causal inference and DAGs
-  dagitty, ggdag
+  dagitty,
+  ggdag
 )
 ```
 
@@ -71,11 +83,11 @@ The ELSI-Brazil is a nationally representative, population-based cohort study of
 
 ## Virtual audit
 
-The ELSI-Urbe Virtual Audit subproject was conducted using a systematic observation method between April and October 2024, based on available Google Street View images. The audit was performed at the street-segment level, considering both sides of the street, and later aggregated into census tracts, which were defined as neighborhoods. The sampling process was carried out in stages, sequentially selecting municipalities (the most populous municipality participating in ELSI-Brazil from each federative unit, with 20 available), census tracts (with ELSI-Brazil interviews), and random street segments. Data collection was conducted by a single trained rater using a multidimensional instrument and a field manual.
+The ELSI-Urbe Virtual Audit subproject was conducted using a systematic observation method between April and October 2024, based on available Google Street View images. The audit was performed at the street-segment level, considering both sides of the street, and later aggregated into census tracts, which were defined as neighborhoods. The sampling process was carried out in stages, sequentially selecting municipalities (the most populous municipality participating in ELSI-Brazil from each federative unit, with 20 municipalities available), census tracts with ELSI-Brazil interviews, and random street segments. Data collection was conducted by a single trained rater using a multidimensional instrument and a field manual.
 
 ## Study sample
 
-The analytical sample followed a two-level multilevel structure in which individuals from the second wave of ELSI-Brazil (level 1) were nested within residential census tracts (level 2). The eligible population comprised participants residing in urban areas whose census tracts had available virtual audit data (n = 2,794 individuals nested within 218 census tracts).
+The analytical sample followed a two-level structure in which individuals from the second wave of ELSI-Brazil (level 1) were nested within residential census tracts (level 2). The eligible population comprised participants residing in urban areas whose census tracts had available virtual audit data (n = 2,794 individuals nested within 218 census tracts).
 
 ## Outcome
 
@@ -93,7 +105,7 @@ In the physical disorder domain, the first subdomain, absence of infrastructure 
 
 ## Adjustment variables
 
-Adjustment variables initially included sociodemographic characteristics, namely sex (female and male), age group (50–59, 60–69, 70–79, and ≥80 years), race/color (white, black or brown, and other (asian and indigenous)), education (≤3, 4–7, and ≥8 years of schooling), marital status (unmarried and married or cohabiting), number of household residents (1, 2, 3, and ≥4), and household income per capita in tertiles (≤933; >933–1,500; and >1,500 reais), as well as health and lifestyle characteristics, including number of chronic diseases (0, 1, and ≥2), depressive symptoms (no and yes), fruit and vegetable consumption (<5 and ≥5 days/week), global physical activity (inactive and active), binge drinking (no and yes), and current tobacco use (no and yes).
+Adjustment variables initially included sociodemographic characteristics, namely sex (female and male), age group (50–59, 60–69, 70–79, and ≥80 years), race/color (white, black or brown, and other [Asian and Indigenous]), education (≤3, 4–7, and ≥8 years of schooling), marital status (unmarried and married or cohabiting), number of household residents (1, 2, 3, and ≥4), and household income per capita in tertiles (≤933; >933–1,500; and >1,500 reais), as well as health and lifestyle characteristics, including number of chronic diseases (0, 1, and ≥2), depressive symptoms (no and yes), fruit and vegetable consumption (<5 and ≥5 days/week), global physical activity (inactive and active), binge drinking (no and yes), and current tobacco use (no and yes).
 
 However, based on the directed acyclic graph (DAG) and the minimal sufficient adjustment set identified, the final models were adjusted for sex, age group, race/color, education, and household income per capita only.
 
@@ -120,7 +132,8 @@ However, based on the directed acyclic graph (DAG) and the minimal sufficient ad
 # physical_environment and poor_self_rated_health:
 # global_physical_activity and depressive_symptoms.
 
-dag <- dagitty("dag {
+dag <- dagitty(
+  "dag {
 
 physical_environment [exposure]
 poor_self_rated_health [outcome]
@@ -155,20 +168,25 @@ global_physical_activity -> poor_self_rated_health
 physical_environment -> depressive_symptoms
 depressive_symptoms -> poor_self_rated_health
 
-}")
+}"
+)
 
 ggdag(dag, layout = "stress") +
   geom_dag_edges(edge_colour = "grey35") +
-  geom_dag_node(color = "grey95", size = 16, shape = 16) + 
-  geom_dag_label(aes(label = name), 
-                 fill = "white",
-                 color = "black",
-                 label.size = 0,
-                 size = 4,
-                 alpha = 0.8) +
+  geom_dag_node(color = "grey95", size = 16, shape = 16) +
+  geom_dag_label(
+    aes(label = name),
+    fill = "white",
+    color = "black",
+    label.size = 0,
+    size = 4,
+    alpha = 0.8
+  ) +
   theme_dag() +
-  theme(panel.background = element_rect(fill = "white"),
-        plot.title = element_blank())
+  theme(
+    panel.background = element_rect(fill = "white"),
+    plot.title = element_blank()
+  )
 ```
 
 ```{r}
@@ -180,7 +198,7 @@ adjustmentSets(dag)
 
 ## Statistical analysis
 
-Descriptive statistics were calculated using frequency distributions (%), means, and standard deviations (SD), accounting for the complex sampling design and individual weights using the survey package. Associations between exposures and outcomes were examined using prevalence ratios (PR) and 95% confidence intervals (CI), estimated using Poisson regression models with a log link and robust variance clustered at the census tract level. The models were adjusted for sociodemographic characteristics. Normalized individual sampling weights were incorporated into the regression models. Multicollinearity among independent variables was assessed using the variance inflation factor (VIF). Post-estimation diagnostics were performed, including assessment of dispersion, Pearson residuals, Cook’s distance, and leverage to evaluate model fit and identify potential outliers and influential observations. The significance level was set at 5%. All analyses were conducted using R software (R version 4.5.0; R Development Core Team).
+Descriptive statistics were calculated using frequency distributions (%), means, and standard deviations (SD), accounting for the complex sampling design and individual weights using the survey package. Associations between each neighborhood indicator and poor self-rated health were examined separately using Poisson regression models with a log link, prevalence ratios (PRs), and 95% confidence intervals (CIs). Robust variance was clustered at the census-tract level, and models were adjusted for the minimum sufficient set of sociodemographic variables identified by the DAG: sex, age group, race/color, education, and household income per capita. Normalized individual sampling weights were incorporated into the regression models. Multicollinearity among independent variables was assessed using the variance inflation factor (VIF). Post-estimation diagnostics were performed, including assessment of dispersion, Pearson residuals, Cook’s distance, and leverage to evaluate model fit and identify potential outliers and influential observations. The significance level was set at 5%. All analyses were conducted using R software (R version 4.5.0; R Development Core Team).
 
 
 
@@ -217,11 +235,13 @@ df %>%
 
 df %>%
   filter(zona == 1) %>%
-  distinct(cidade2, .keep_all = TRUE) %>% 
+  distinct(cidade2, .keep_all = TRUE) %>%
   mutate(
-    cidade_auditoria = factor(cidade_auditoria, 
-                              levels = c(0, 1), 
-                              labels = c("No", "Yes"))
+    cidade_auditoria = factor(
+      cidade_auditoria,
+      levels = c(0, 1),
+      labels = c("No", "Yes")
+    )
   ) %>%
   select(cidade_auditoria) %>%
   tbl_summary(
@@ -251,7 +271,8 @@ df %>%
   ) %>%
   select(`#`, everything()) %>%
   knitr::kable(
-    col.names = c("#", "City", "Virtual audit"))
+    col.names = c("#", "City", "Virtual audit")
+  )
 ```
 
 ```{r}
@@ -260,12 +281,13 @@ df %>%
 
 df %>%
   filter(zona == 1) %>%
-  distinct(setor, .keep_all = TRUE) %>% 
+  distinct(setor, .keep_all = TRUE) %>%
   mutate(
     setor_auditoria = factor(
       setor_auditoria,
       levels = c(0, 1),
-      labels = c("No", "Yes"))
+      labels = c("No", "Yes")
+    )
   ) %>%
   select(setor_auditoria) %>%
   tbl_summary(
@@ -280,7 +302,6 @@ df %>%
   ) %>%
   modify_footnote(everything() ~ NA)
 ```
-
 ```{r}
 #| label: Distribution of individuals in census tracts and virtual urban audit status
 #| code-summary: Distribution of individuals in census tracts and virtual urban audit status
@@ -291,7 +312,8 @@ df %>%
     setor_auditoria = factor(
       setor_auditoria,
       levels = c(0, 1),
-      labels = c("No", "Yes"))
+      labels = c("No", "Yes")
+    )
   ) %>%
   select(setor_auditoria) %>%
   tbl_summary(
@@ -322,7 +344,8 @@ df %>%
     aas_inv2 = factor(
       aas_inv2,
       levels = c(0, 1),
-      labels = c("Good", "Poor"))
+      labels = c("Good", "Poor")
+    )
   ) %>%
   as_survey_design(
     ids = upa,
@@ -361,55 +384,73 @@ analysis_df <-
   filter(zona == 1, !is.na(identificador), !is.na(aas_inv2)) %>%
   mutate(
     aas_inv2 = haven::as_factor(aas_inv2),
+    idade = as.numeric(idade),
     sexo = factor(sexo, levels = c(0, 1), labels = c("Female", "Male")),
     faixaetaria = factor(
       faixaetaria,
       levels = c(1, 2, 3, 4),
-      labels = c("50-59", "60-69", "70-79", "≥80")),
+      labels = c("50-59", "60-69", "70-79", "≥80")
+    ),
     cor_raca2 = factor(
       cor_raca2,
       levels = c(1, 2, 3),
-      labels = c("White", "Black or brown", "Other")),
+      labels = c("White", "Black or brown", "Other")
+    ),
     escolaridade2 = factor(
       escolaridade2,
       levels = c(1, 2, 3),
-      labels = c("≤3", "4-7", "≥8")),
+      labels = c("≤3", "4-7", "≥8")
+    ),
     estado_civil = factor(
       estado_civil,
       levels = c(0, 1),
-      labels = c("Unmarried", "Married or cohabiting")),
+      labels = c("Unmarried", "Married or cohabiting")
+    ),
     nmoradores2 = factor(
       nmoradores2,
       levels = c(1, 2, 3, 4),
-      labels = c("1", "2", "3", "≥4")),
+      labels = c("1", "2", "3", "≥4")
+    ),
     rendadompc2corr = factor(
       rendadompc2corr,
       levels = c(1, 2, 3),
-      labels = c("1st tertile: ≤933", "2nd tertile: >933-1,500", "3rd tertile: >1,500")),
+      labels = c(
+        "1st tertile: ≤933",
+        "2nd tertile: >933-1,500",
+        "3rd tertile: >1,500"
+      )
+    ),
     dcnt2 = factor(
       dcnt2,
       levels = c(0, 1, 2),
-      labels = c("0", "1", "≥2")),
+      labels = c("0", "1", "≥2")
+    ),
     sint_dep = factor(
       sint_dep,
       levels = c(0, 1),
-      labels = c("No", "Yes")),
+      labels = c("No", "Yes")
+    ),
     regularFH = factor(
       regularFH,
       levels = c(0, 1),
-      labels = c("<5", "≥5")),
+      labels = c("<5", "≥5")
+    ),
     af_global = factor(
       af_global,
       levels = c(0, 1),
-      labels = c("Inactive", "Active")),
+      labels = c("Inactive", "Active")
+    ),
     consumo_abusivo = factor(
       consumo_abusivo,
       levels = c(0, 1),
-      labels = c("No", "Yes")),
+      labels = c("No", "Yes")
+    ),
     consumo_tabaco = factor(
       consumo_tabaco,
       levels = c(0, 1),
-      labels = c("No", "Yes")))
+      labels = c("No", "Yes")
+    )
+  )
 
 n_total <- nrow(analysis_df)
 n_good <- sum(analysis_df$aas_inv2 == "Excelente/Muito boa/Boa", na.rm = TRUE)
@@ -425,41 +466,62 @@ analysis_df %>%
   tbl_svysummary(
     by = aas_inv2,
     include = c(
-      sexo, faixaetaria, cor_raca2, escolaridade2, estado_civil, nmoradores2, rendadompc2corr,
-      dcnt2, sint_dep, regularFH, af_global, consumo_abusivo, consumo_tabaco,
-      dom_urbana1_escala, dom_urbana2_escala,
-      dom_transito1_escala, dom_transito2_escala,
-      dom_desordem1_escala, dom_desordem2_escala),
+      idade,
+      sexo,
+      faixaetaria,
+      cor_raca2,
+      escolaridade2,
+      estado_civil,
+      nmoradores2,
+      rendadompc2corr,
+      dcnt2,
+      sint_dep,
+      regularFH,
+      af_global,
+      consumo_abusivo,
+      consumo_tabaco,
+      dom_urbana1_escala,
+      dom_urbana2_escala,
+      dom_transito1_escala,
+      dom_transito2_escala,
+      dom_desordem1_escala,
+      dom_desordem2_escala
+    ),
     type = list(
       sint_dep ~ "categorical",
       consumo_abusivo ~ "categorical",
-      consumo_tabaco ~ "categorical"),
+      consumo_tabaco ~ "categorical"
+    ),
     label = list(
-        sexo ~ "Sex",
-        faixaetaria ~ "Age group (years)",
-        cor_raca2 ~ "Race/Color",
-        escolaridade2 ~ "Education (years)",
-        estado_civil ~ "Marital status",
-        nmoradores2 ~ "Number of household residents",
-        rendadompc2corr ~ "Household income per capita in tertiles (R$)",
-        dcnt2 ~ "Number of chronic diseases",
-        sint_dep ~ "Depressive symptoms,",
-        regularFH ~ "Fruit and vegetable consumption",
-        af_global ~ "Global physical activity",
-        consumo_abusivo ~ "Binge drinking",
-        consumo_tabaco ~ "Current tobacco use",
-        dom_urbana1_escala ~ "Pathway accessibility [mean (SD)]",
-        dom_urbana2_escala ~ "Surface and continuity [mean (SD)]",
-        dom_transito1_escala ~ "Markings and controls [mean (SD)]",
-        dom_transito2_escala ~ "Speed and bus lane [mean (SD)]",
-        dom_desordem1_escala ~ "Absence of infrastructure and vegetation [mean (SD)]",
-        dom_desordem2_escala ~ "Absence of building and green spaces [mean (SD)]"),
+      idade ~ "Age (years)",
+      sexo ~ "Sex",
+      faixaetaria ~ "Age group (years)",
+      cor_raca2 ~ "Race/Color",
+      escolaridade2 ~ "Education (years)",
+      estado_civil ~ "Marital status",
+      nmoradores2 ~ "Number of household residents",
+      rendadompc2corr ~ "Household income per capita in tertiles (R$)",
+      dcnt2 ~ "Number of chronic diseases",
+      sint_dep ~ "Depressive symptoms,",
+      regularFH ~ "Fruit and vegetable consumption",
+      af_global ~ "Global physical activity",
+      consumo_abusivo ~ "Binge drinking",
+      consumo_tabaco ~ "Current tobacco use",
+      dom_urbana1_escala ~ "Pathway accessibility [mean (SD)]",
+      dom_urbana2_escala ~ "Surface and continuity [mean (SD)]",
+      dom_transito1_escala ~ "Markings and controls [mean (SD)]",
+      dom_transito2_escala ~ "Speed and bus lane [mean (SD)]",
+      dom_desordem1_escala ~ "Absence of infrastructure and vegetation [mean (SD)]",
+      dom_desordem2_escala ~ "Absence of building and green spaces [mean (SD)]"
+    ),
     statistic = list(
       all_categorical() ~ "{p}",
-      all_continuous() ~ "{mean} ({sd})"),
+      all_continuous() ~ "{mean} ({sd})"
+    ),
     digits = list(
       all_categorical() ~ 1,
-      all_continuous() ~ 1),
+      all_continuous() ~ 1
+    ),
     missing = "no"
   ) %>%
   add_overall(last = FALSE) %>%
@@ -469,7 +531,8 @@ analysis_df %>%
   add_ci(
     style_fun = list(
       all_categorical() ~ function(x) sprintf("%.1f", x * 100),
-      all_continuous() ~ function(x) style_sigfig(x, digits = 1))
+      all_continuous() ~ function(x) style_sigfig(x, digits = 1)
+    )
   ) %>%
   modify_table_body(
     ~ .x %>%
@@ -477,14 +540,15 @@ analysis_df %>%
         dplyr::across(
           starts_with("ci_stat"),
           ~ ifelse(
-            variable %in% c(
-              "dom_urbana1_escala",
-              "dom_urbana2_escala",
-              "dom_transito1_escala",
-              "dom_transito2_escala",
-              "dom_desordem1_escala",
-              "dom_desordem2_escala"
-            ),
+            variable %in%
+              c(
+                "dom_urbana1_escala",
+                "dom_urbana2_escala",
+                "dom_transito1_escala",
+                "dom_transito2_escala",
+                "dom_desordem1_escala",
+                "dom_desordem2_escala"
+              ),
             "",
             .x
           )
@@ -509,8 +573,16 @@ analysis_df %>%
   ) %>%
   modify_spanning_header(
     c(stat_0, ci_stat_0) ~ paste0("**Total<br>n=", n_total, "**"),
-    c(stat_1, ci_stat_1) ~ paste0("**Good self-rated health<br>n=", n_good, "**"),
-    c(stat_2, ci_stat_2) ~ paste0("**Poor self-rated health<br>n=", n_poor, "**")
+    c(stat_1, ci_stat_1) ~ paste0(
+      "**Good self-rated health<br>n=",
+      n_good,
+      "**"
+    ),
+    c(stat_2, ci_stat_2) ~ paste0(
+      "**Poor self-rated health<br>n=",
+      n_poor,
+      "**"
+    )
   ) %>%
   modify_footnote(everything() ~ NA) %>%
   as_gt() %>%
@@ -520,7 +592,7 @@ analysis_df %>%
 ```
 
 
-## Multilevel poisson models with robust variance clustered at census tract
+## Poisson regression models with robust variance clustered at census tract
 
 ```{r}
 #| label: Crude association
@@ -532,7 +604,8 @@ analysis_data_ct_crude <- df %>%
   filter(zona == 1, !is.na(identificador), !is.na(aas_inv2)) %>%
   mutate(
     census_tract = factor(setor),
-    normalized_weight = peso_calibrado / mean(peso_calibrado, na.rm = TRUE))
+    normalized_weight = peso_calibrado / mean(peso_calibrado, na.rm = TRUE)
+  )
 
 exposure_labels <- c(
   dom_urbana1_escala = "Pathway accessibility",
@@ -540,28 +613,32 @@ exposure_labels <- c(
   dom_transito1_escala = "Markings and controls",
   dom_transito2_escala = "Speed and bus lane",
   dom_desordem1_escala = "Absence of infrastructure and vegetation",
-  dom_desordem2_escala = "Absence of building and green spaces")
+  dom_desordem2_escala = "Absence of buildings and green spaces"
+)
 
 outcome_labels <- c(
-  aas_inv2 = "Self-rated health (poor vs. good)")
+  aas_inv2 = "Self-rated health (poor vs. good)"
+)
 
 exposure_vars <- names(exposure_labels)
-outcome_vars  <- names(outcome_labels)
+outcome_vars <- names(outcome_labels)
 
 run_model_row_ct_crude <- function(outcome_var, exp_var) {
-
   model_formula <- as.formula(
-    paste(outcome_var, "~", exp_var))
+    paste(outcome_var, "~", exp_var)
+  )
 
   model_fit_ct_crude <- glm(
     formula = model_formula,
     data = analysis_data_ct_crude,
     family = poisson(link = "log"),
-    weights = normalized_weight)
+    weights = normalized_weight
+  )
 
   robust_vcov <- sandwich::vcovCL(
     model_fit_ct_crude,
-    cluster = analysis_data_ct_crude$census_tract)
+    cluster = analysis_data_ct_crude$census_tract
+  )
 
   lbl_list <- list()
   lbl_list[[exp_var]] <- exposure_labels[[exp_var]]
@@ -590,12 +667,14 @@ run_model_row_ct_crude <- function(outcome_var, exp_var) {
 }
 
 table_list_ct_crude <- map(outcome_vars, function(out_v) {
-  sub_tables <- map(exposure_vars, ~run_model_row_ct_crude(out_v, .x))
-  tbl_stack(sub_tables)})
+  sub_tables <- map(exposure_vars, ~ run_model_row_ct_crude(out_v, .x))
+  tbl_stack(sub_tables)
+})
 
 final_table_ct_crude <- tbl_stack(
   tbls = table_list_ct_crude,
-  group_header = outcome_labels[outcome_vars])
+  group_header = outcome_labels[outcome_vars]
+)
 
 gt_table_crude <- final_table_ct_crude %>%
   as_gt()
@@ -613,7 +692,8 @@ gt_table_crude %>%
     table.width = gt::pct(100)
   ) %>%
   gt::tab_source_note(
-    source_note = "Abbreviations: PR = Prevalence Ratio; CI = Confidence Interval. Each association was estimated in a separate Poisson regression model with robust variance clustered at the census tract level.")
+    source_note = "Abbreviations: PR = Prevalence Ratio; CI = Confidence Interval. Each association was estimated in a separate Poisson regression model with robust variance clustered at the census tract level."
+  )
 ```
 
 ```{r}
@@ -630,13 +710,20 @@ analysis_data_ct_minimo <- df %>%
   )
 
 adjustments_minimo <- c(
-  "sexo", "faixaetaria", "cor_raca2", "escolaridade2", "rendadompc2corr")
+  "sexo",
+  "faixaetaria",
+  "cor_raca2",
+  "escolaridade2",
+  "rendadompc2corr"
+)
 
 run_model_row_ct_minimo <- function(outcome_var, exp_var) {
-
   model_formula <- as.formula(
     paste(
-      outcome_var, "~", exp_var, "+",
+      outcome_var,
+      "~",
+      exp_var,
+      "+",
       paste(adjustments_minimo, collapse = " + ")
     )
   )
@@ -675,15 +762,16 @@ run_model_row_ct_minimo <- function(outcome_var, exp_var) {
     modify_header(
       label = "**Neighborhood indicators**",
       estimate = "**PR**",
-      ci = "**95% CI**")
-    return(list(
+      ci = "**95% CI**"
+    )
+  return(list(
     model = model_fit_ct_minimo,
     table = table_out
-))
+  ))
 }
 
 results_list_ct_minimo <- map(outcome_vars, function(out_v) {
-  map(exposure_vars, ~run_model_row_ct_minimo(out_v, .x))
+  map(exposure_vars, ~ run_model_row_ct_minimo(out_v, .x))
 })
 
 models_ct_minimo <- results_list_ct_minimo %>%
@@ -727,9 +815,20 @@ gt_table_minimo %>%
 #| message: false
 
 vif_model_minimo <- glm(
-  aas_inv2 ~ dom_urbana1_escala + dom_urbana2_escala + dom_transito1_escala + dom_transito2_escala + dom_desordem1_escala + dom_desordem2_escala + sexo + faixaetaria + cor_raca2 + escolaridade2 + rendadompc2corr,
+  aas_inv2 ~ dom_urbana1_escala +
+    dom_urbana2_escala +
+    dom_transito1_escala +
+    dom_transito2_escala +
+    dom_desordem1_escala +
+    dom_desordem2_escala +
+    sexo +
+    faixaetaria +
+    cor_raca2 +
+    escolaridade2 +
+    rendadompc2corr,
   data = analysis_data_ct_minimo,
-  family = poisson(link = "log"))
+  family = poisson(link = "log")
+)
 
 car::vif(vif_model_minimo)
 ```
@@ -742,7 +841,6 @@ car::vif(vif_model_minimo)
 # Pearson residuals: < −3 or > 3 (possible outliers)
 # Cook’s distance: >1 (influential observations)
 # Leverage: higher values indicate greater influence on fitted values
-
 
 check_model_fit <- function(model) {
   # Pearson dispersion
@@ -787,14 +885,19 @@ analysis_data_ct_int_age <- df %>%
 
 # Minimum adjustment set
 adjustments_int_age <- c(
-  "sexo", "cor_raca2", "escolaridade2", "rendadompc2corr")
+  "sexo",
+  "cor_raca2",
+  "escolaridade2",
+  "rendadompc2corr"
+)
 
 run_model_row_ct_int_age <- function(outcome_var, exp_var) {
-
   model_formula <- as.formula(
     paste(
-      outcome_var, "~",
-      paste0(exp_var, " * faixaetaria"), "+",
+      outcome_var,
+      "~",
+      paste0(exp_var, " * faixaetaria"),
+      "+",
       paste(adjustments_int_age, collapse = " + ")
     )
   )
@@ -823,7 +926,7 @@ run_model_row_ct_int_age <- function(outcome_var, exp_var) {
 }
 
 results_list_ct_int_age <- map(outcome_vars, function(out_v) {
-  map(exposure_vars, ~run_model_row_ct_int_age(out_v, .x))
+  map(exposure_vars, ~ run_model_row_ct_int_age(out_v, .x))
 })
 
 models_ct_int_age <- results_list_ct_int_age %>%
@@ -835,4 +938,150 @@ summaries_ct_int_age <- results_list_ct_int_age %>%
   purrr::map("summary")
 
 summaries_ct_int_age
+```
+
+## Adjusted associations: forest plot
+
+The figure below summarizes the associations from the six adjusted Poisson regression models. The subdomains are shown on the left, and colors identify the corresponding neighborhood domains. Each neighborhood indicator was entered in a separate model, and estimates represent the prevalence ratio for poor self-rated health per one-unit increase in the corresponding indicator.
+
+```{r}
+#| label: Adjusted associations forest plot
+#| fig-cap: "Adjusted prevalence ratios (PRs) and 95% confidence intervals for poor self-rated health (regular, poor, or very poor self-rated health) according to neighborhood physical characteristics. Subdomains are shown on the left and colors identify the three neighborhood domains. Models were adjusted for sex, age group, race/color, education, and household income per capita. Each indicator was assessed in a separate model."
+#| fig-width: 9
+#| fig-height: 7.5
+#| fig-dpi: 300
+#| out-width: 100%
+#| cache: false
+#| warning: false
+#| message: false
+
+domain_labels <- c(
+  dom_urbana1_escala = "Urban infrastructure",
+  dom_urbana2_escala = "Urban infrastructure",
+  dom_transito1_escala = "Traffic",
+  dom_transito2_escala = "Traffic",
+  dom_desordem1_escala = "Physical disorder",
+  dom_desordem2_escala = "Physical disorder"
+)
+
+forest_data <- purrr::map2_dfr(
+  exposure_vars,
+  models_ct_minimo,
+  function(exp_var, model) {
+    robust_vcov <- sandwich::vcovCL(
+      model,
+      cluster = analysis_data_ct_minimo$census_tract
+    )
+    coefficient <- lmtest::coeftest(model, vcov. = robust_vcov)[exp_var, ]
+    estimate <- unname(coefficient["Estimate"])
+    standard_error <- unname(coefficient["Std. Error"])
+
+    tibble(
+      indicator = exposure_labels[[exp_var]],
+      domain = domain_labels[[exp_var]],
+      pr = exp(estimate),
+      conf_low = exp(estimate - 1.96 * standard_error),
+      conf_high = exp(estimate + 1.96 * standard_error),
+      label = sprintf(
+        "%.2f (%.2f–%.2f)",
+        exp(estimate),
+        exp(estimate - 1.96 * standard_error),
+        exp(estimate + 1.96 * standard_error)
+      )
+    )
+  }
+) %>%
+  mutate(
+    indicator = factor(indicator, levels = rev(indicator)),
+    domain = factor(
+      domain,
+      levels = c(
+        "Urban infrastructure",
+        "Traffic",
+        "Physical disorder"
+      )
+    )
+  )
+
+# Adjust label_gap to move the numeric labels horizontally from each CI.
+label_gap <- 0.03
+x_max <- max(forest_data$conf_high + label_gap, na.rm = TRUE) + 0.25
+
+forest_plot <- ggplot(forest_data, aes(y = indicator, x = pr, color = domain)) +
+  geom_vline(
+    xintercept = 1,
+    linetype = "dashed",
+    color = "grey75",
+    linewidth = 0.6
+  ) +
+  geom_segment(
+    aes(x = conf_low, xend = conf_high, yend = indicator),
+    linewidth = 0.9,
+    lineend = "round"
+  ) +
+  geom_point(size = 3) +
+  geom_text(
+    data = forest_data,
+    aes(
+      x = conf_high + label_gap,
+      y = indicator,
+      label = label,
+      color = domain
+    ),
+    inherit.aes = FALSE,
+    hjust = 0,
+    size = 4.0,
+    show.legend = FALSE
+  ) +
+  scale_x_continuous(
+    name = "\n Prevalence ratio for poor self-rated health \n",
+    breaks = c(0.70, 0.80, 0.90, 1.00, 1.10, 1.20),
+    limits = c(0.70, x_max),
+    expand = expansion(mult = c(0, 0.02))
+  ) +
+  scale_y_discrete(name = "Neighborhood subdomains \n") +
+  scale_color_manual(
+    name = "Domain",
+    labels = c("Infrastructure", "Traffic", "Physical disorder"),
+    values = c(
+      "Urban infrastructure" = "#38275f",
+      "Traffic" = "#1c4d09",
+      "Physical disorder" = "#c13877"
+    )
+  ) +
+  guides(color = guide_legend(nrow = 1, byrow = TRUE)) +
+  coord_cartesian(clip = "off") +
+  theme_minimal(base_size = 15) +
+  theme(
+    legend.position = "bottom",
+    legend.justification = "left",
+    legend.direction = "horizontal",
+    legend.title.position = "left",
+    legend.box.just = "left",
+    panel.grid.minor = element_blank(),
+    panel.grid.major.y = element_blank(),
+    axis.text.y = element_text(color = "grey15", size = 13),
+    axis.text.x = element_text(size = 13),
+    axis.title.x = element_text(size = 13),
+    axis.title.y = element_text(size = 13),
+    legend.text = element_text(size = 13),
+    legend.title = element_text(size = 13),
+    legend.spacing.x = grid::unit(0.1, "cm"),
+    legend.key.width = grid::unit(0.5, "cm"),
+    legend.margin = margin(t = 4, r = 4, b = 4, l = 4),
+    legend.box.margin = margin(t = 0, r = 0, b = 0, l = 0),
+    plot.margin = margin(5.5, 25, 20, 10)
+  )
+
+ggsave(
+  filename = "forest_plot_poster.png",
+  plot = forest_plot,
+  width = 9,
+  height = 7.5,
+  units = "in",
+  dpi = 300,
+  bg = "white"
+)
+
+knitr::include_graphics("forest_plot_poster.png")
 ```
