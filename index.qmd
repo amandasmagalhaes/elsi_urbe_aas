@@ -1034,7 +1034,7 @@ forest_plot <- ggplot(forest_data, aes(y = indicator, x = pr, color = domain)) +
     show.legend = FALSE
   ) +
   scale_x_continuous(
-    name = "\n Prevalence ratio for poor self-rated health \n",
+    name = "\n Prevalence ratio (PR) for poor self-rated health \n",
     breaks = c(0.70, 0.80, 0.90, 1.00, 1.10, 1.20),
     limits = c(0.70, x_max),
     expand = expansion(mult = c(0, 0.02))
